@@ -1,0 +1,24 @@
+[package]
+name = "first_order_logic"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.8.5"
+bimap = "0.6.2"
+enum_dispatch = " 0.3.11"
+
+[features]
+default=["semantics", "syntax", "formula"]
+semantics=[]
+syntax=[]
+formula=["semantics"]
+
+# docs.rs-specific configuration
+[package.metadata.docs.rs]
+# document all features
+all-features = true
+# defines the configuration attribute `docsrs`
+rustdoc-args = ["--config", "docsrs"]
