@@ -2,8 +2,10 @@ use std::fmt::Display;
 
 use crate::syntax::{grammar::terms::Variable, Replace};
 
+/// A syntax node for the negation of a formula
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Negation<F> {
+    /// The formula to negate
     pub right: F,
 }
 

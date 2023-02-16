@@ -2,9 +2,12 @@ use std::fmt::Display;
 
 use crate::syntax::{grammar::terms::Variable, Replace};
 
+/// A syntax node for the implication of two formula
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Implication<Left, Right> {
+    /// The left formula
     pub left: Left,
+    /// The right formula
     pub right: Right,
 }
 
