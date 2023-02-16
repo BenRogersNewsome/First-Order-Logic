@@ -4,123 +4,31 @@ use crate::syntax::{Negation, GenericAtomicFormula, Conjunction, Disjunction, Im
 
 use super::{PrenexNormalFormulaTerm, SkolemNormalFormula};
 
+/// A Clause normal Form (CNF).
+/// 
+/// Semantically equivalent to a conjunctive normal form
+/// (`(P ∨ Q ∨ ...) ∧ (R ∨ ...) ∧ `), only expressed as a set of sets
+/// (`{{P, Q, ...}, {R, ...}, ...}`).
+pub type ClauseNormalForm = Vec<Vec<Literal>>;
 
-/// A flat conjunction of the form `A ∧ B ∧ ...`
+impl Into<ClauseNormalForm> for ConjunctiveNormalFormula {
+    fn into(self) -> Vec<Vec<Literal>> {
+        self.clauses.into_iter().map(|x| {
+            x.literals
+        }).collect()
+    }
+}
+
+/// A formula in Conjunctive Normal Form.
+/// 
+/// A formula of the form `(P ∨ Q ∨ ...) ∧ (R ∨ ...) ∧ ...`
 #[derive(Clone)]
-pub struct FlatConjunction<T> {
-    pub terms: Vec<T>,
+pub struct ConjunctiveNormalFormula {
+    /// The clauses of the CNF.
+    pub clauses: Vec<Clause>,
 }
 
-impl<T> BitAnd for FlatConjunction<T> {
-    type Output = Self;
-    fn bitand(self, rhs: Self) -> Self::Output {
-        Self {
-            terms: self.terms.into_iter()
-                .chain(
-                    rhs.terms.into_iter()
-                ).collect()
-        }
-    }
-}
-
-impl<T: Display> Display for FlatConjunction<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.terms.len() > 1 {
-            f.write_str("(")?;
-        };
-
-        let mut first = true;
-        for term in &self.terms {
-            if !first {
-                f.write_str("∧")?;
-            };
-            first = false;
-            term.fmt(f)?;
-        };
-
-        if self.terms.len() > 1 {
-            f.write_str(")")?;
-        };
-        Ok(())
-    }
-}
-
-/// A flat disjunction of the form `A ∨ B ∨ ...`
-#[derive(Clone)]
-pub struct FlatDisjunction <T> {
-    pub terms: Vec<T>,
-}
-
-impl<T: Display> Display for FlatDisjunction<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.terms.len() > 1 {
-            f.write_str("(")?;
-        };
-
-        let mut first = true;
-        for term in &self.terms {
-            if !first {
-                f.write_str("∨")?;
-            };
-            first = false;
-            term.fmt(f)?;
-        };
-
-        if self.terms.len() > 1 {
-            f.write_str(")")?;
-        };
-        Ok(())
-    }
-}
-
-/// Chain two flat disjunctions together. I.e. `(A ∨ B) | (C ∨ D) =
-/// (A ∨ B ∨ C ∨ D)`.
-impl<T> BitOr for FlatDisjunction<T> {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        Self {
-            terms: self.terms.into_iter()
-                .chain(
-                    rhs.terms.into_iter()
-                ).collect()
-        }
-    }
-}
-
-#[derive(Clone)]
-pub enum CNFInnerForm {
-    Atomic(GenericAtomicFormula),
-    Negated(Negation<GenericAtomicFormula>),
-}
-
-impl CNFInnerForm {
-    pub fn negate(&self) -> Self {
-        match self {
-            Self::Atomic(x) => {
-                Self::Negated(Negation { right: x.clone() })
-            },
-            Self::Negated(Negation { right: x }) => {
-                Self::Atomic(x.clone())
-            },
-        }
-    }
-}
-
-impl Display for CNFInnerForm {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self {
-            Self::Atomic(x) => {x.fmt(f)},
-            Self::Negated(x) => x.fmt(f),
-        }
-    }
-}
-
-pub type ConjunctiveNormalFormula = FlatConjunction<
-    FlatDisjunction<
-        CNFInnerForm
-    >
->;
-
+/// Convert a formula, in any other form, into its CNF.
 impl<T: Into<SkolemNormalFormula>> From<T> for ConjunctiveNormalFormula {
     fn from(f: T) -> Self {
         let skolem: SkolemNormalFormula = f.into();
@@ -128,6 +36,123 @@ impl<T: Into<SkolemNormalFormula>> From<T> for ConjunctiveNormalFormula {
     }
 }
 
+/// Combine two conjunctive normal formula together.
+impl BitAnd for ConjunctiveNormalFormula {
+    type Output = Self;
+    fn bitand(self, rhs: Self) -> Self::Output {
+        Self {
+            clauses: self.clauses.into_iter()
+                .chain(
+                    rhs.clauses.into_iter()
+                ).collect()
+        }
+    }
+}
+
+impl Display for ConjunctiveNormalFormula {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.clauses.len() > 1 {
+            f.write_str("(")?;
+        };
+
+        let mut first = true;
+        for term in &self.clauses {
+            if !first {
+                f.write_str("∧")?;
+            };
+            first = false;
+            term.fmt(f)?;
+        };
+
+        if self.clauses.len() > 1 {
+            f.write_str(")")?;
+        };
+        Ok(())
+    }
+}
+
+/// A clause of literals.
+/// 
+/// A flat disjunction of the form `A ∨ B ∨ ...`.
+#[derive(Clone)]
+pub struct Clause {
+    /// The literals which make up the clause.
+    pub literals: Vec<Literal>,
+}
+
+impl Display for Clause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.literals.len() > 1 {
+            f.write_str("(")?;
+        };
+
+        let mut first = true;
+        for term in &self.literals {
+            if !first {
+                f.write_str("∨")?;
+            };
+            first = false;
+            term.fmt(f)?;
+        };
+
+        if self.literals.len() > 1 {
+            f.write_str(")")?;
+        };
+        Ok(())
+    }
+}
+
+/// Chain two clauses together. I.e. `(A ∨ B) | (C ∨ D) =
+/// (A ∨ B ∨ C ∨ D)`.
+impl BitOr for Clause {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Self {
+            literals: self.literals.into_iter()
+                .chain(
+                    rhs.literals.into_iter()
+                ).collect()
+        }
+    }
+}
+
+/// A logical literal - an atom or its negation.
+#[derive(Clone)]
+pub enum Literal {
+    /// An atom
+    Atom(GenericAtomicFormula),
+    /// A negated atom
+    Negated(Negation<GenericAtomicFormula>),
+}
+
+impl Literal {
+    /// Negate a literal, returning the new literal.
+    pub fn negate(&self) -> Self {
+        match self {
+            Self::Atom(x) => {
+                Self::Negated(Negation { right: x.clone() })
+            },
+            Self::Negated(Negation { right: x }) => {
+                Self::Atom(x.clone())
+            },
+        }
+    }
+}
+
+impl Display for Literal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            Self::Atom(x) => {x.fmt(f)},
+            Self::Negated(x) => x.fmt(f),
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Conversion Algorithm
+////////////////////////////////////////////////////////////////////////////////
+
+#[doc(hidden)]
 impl From<PrenexNormalFormulaTerm> for ConjunctiveNormalFormula {
     fn from(f: PrenexNormalFormulaTerm) -> Self {
         match f {
@@ -140,26 +165,14 @@ impl From<PrenexNormalFormulaTerm> for ConjunctiveNormalFormula {
     }
 }
 
-impl From<GenericAtomicFormula> for ConjunctiveNormalFormula {
-    fn from(f: GenericAtomicFormula) -> Self {
-        ConjunctiveNormalFormula {
-            terms: vec![
-                FlatDisjunction {
-                    terms: vec![
-                        CNFInnerForm::Atomic(f),
-                    ]
-                }
-            ]
-        }
-    }
-}
-
+#[doc(hidden)]
 impl From<Conjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>> for ConjunctiveNormalFormula {
     fn from(f: Conjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>) -> ConjunctiveNormalFormula {
         f.left & f.right
     }
 }
 
+#[doc(hidden)]
 impl From<Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for ConjunctiveNormalFormula {
     fn from(f: Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>) -> ConjunctiveNormalFormula {
         Conjunction::<ConjunctiveNormalFormula, ConjunctiveNormalFormula> {
@@ -169,22 +182,24 @@ impl From<Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for Con
     }
 }
 
+#[doc(hidden)]
 impl From<Disjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>> for ConjunctiveNormalFormula {
     fn from(f: Disjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>) -> ConjunctiveNormalFormula {
-        let mut terms: Vec<FlatDisjunction<CNFInnerForm>> = Vec::with_capacity(f.left.terms.len() * f.right.terms.len());
+        let mut terms: Vec<Clause> = Vec::with_capacity(f.left.clauses.len() * f.right.clauses.len());
 
-        for l_term in &f.left.terms {
-            for r_term in &f.right.terms {
+        for l_term in &f.left.clauses {
+            for r_term in &f.right.clauses {
                 terms.push(l_term.clone() | r_term.clone())
             };
         };
 
         ConjunctiveNormalFormula {
-            terms,
+            clauses: terms,
         }
     }
 }
 
+#[doc(hidden)]
 impl From<Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for ConjunctiveNormalFormula {
     fn from(f: Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>) -> ConjunctiveNormalFormula {
         Disjunction::<ConjunctiveNormalFormula, ConjunctiveNormalFormula> {
@@ -194,6 +209,7 @@ impl From<Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for Con
     }
 }
 
+#[doc(hidden)]
 impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm> {
     fn from(f: Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>) -> Self {
         Disjunction {
@@ -203,17 +219,19 @@ impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for Dis
     }
 }
 
+#[doc(hidden)]
 impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for ConjunctiveNormalFormula {
     fn from(f: Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>) -> Self {
         Disjunction::<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>::from(f).into()
     }
 }
 
+#[doc(hidden)]
 impl From<Negation<ConjunctiveNormalFormula>> for ConjunctiveNormalFormula {
     fn from(f: Negation<ConjunctiveNormalFormula>) -> Self {
         let mut right = f.right;
-        for conjuncted in &mut right.terms {
-            for disjuncted in &mut conjuncted.terms {
+        for conjuncted in &mut right.clauses {
+            for disjuncted in &mut conjuncted.literals {
                 *disjuncted = disjuncted.negate()
             } 
         };
@@ -221,6 +239,7 @@ impl From<Negation<ConjunctiveNormalFormula>> for ConjunctiveNormalFormula {
     }
 }
 
+#[doc(hidden)]
 impl From<Negation<PrenexNormalFormulaTerm>> for ConjunctiveNormalFormula {
     fn from(f: Negation<PrenexNormalFormulaTerm>) -> ConjunctiveNormalFormula {
         Negation::<ConjunctiveNormalFormula> {
