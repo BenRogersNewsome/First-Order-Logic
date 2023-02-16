@@ -5,7 +5,9 @@ use crate::syntax::{grammar::terms::Variable, Replace};
 /// A syntax node for a biconditional between two nodes.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Biconditional<Left, Right> {
+    /// The left formula
     pub left: Left,
+    /// The right formula
     pub right: Right,
 }
 

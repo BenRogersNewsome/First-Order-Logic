@@ -11,7 +11,7 @@
 
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
-// #![warn(missing_docs)]
+#![warn(missing_docs)]
 
 mod primitives;
 pub use primitives::{AssertionResponse, ElementValue, TruthValue};

@@ -1,9 +1,12 @@
 use crate::syntax::{Replace, Variable};
 use std::fmt::{Debug, Display};
 
+/// A syntax node for the a universal quantifier
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Universal<Right> {
+    /// The variable being quantified
     pub left: Variable,
+    /// The formula for which the quantifier applies
     pub right: Right,
 }
 

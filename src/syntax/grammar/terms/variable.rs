@@ -2,16 +2,34 @@ use std::fmt::Display;
 
 use crate::syntax::Replace;
 
+/// A syntax node for a variable
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Variable {
+    /// The u64 label of the variable.
     pub label: u64,
 }
 
 impl Variable {
+    /// Create a new variable from a u64
+    /// # Examples
+    /// 
+    /// ```
+    /// # use first_order_logic::syntax::grammer::Variable;
+    /// let var_x: Variable = Variable::new(b"x".into());
+    /// ```
     pub fn new(label: u64) -> Self {
         Self::from(label)
     }
 
+    /// Create a variable with a random label. Useful for variable replacements
+    /// in when combining formula, to prevent variable collisions.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// # use first_order_logic::syntax::grammer::Variable;
+    /// let var_x: Variable = Variable::rand();
+    /// ```
     pub fn rand() -> Self {
         Self::new(rand::random())
     }

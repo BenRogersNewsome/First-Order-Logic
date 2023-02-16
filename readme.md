@@ -11,7 +11,6 @@ Goals:
 
 Non-goals:
 - Implement any formalism of set theory, or expose the idea of a set.
-- Implement second-order, or higher-order logics.
 
 # Package Structure
 
@@ -22,14 +21,3 @@ Exposes an interface for dealing with first-order logic on a purely syntactic le
 ## Graph
 
 Provides the logic which backs the semantic engine of first-order logic, using an in-memory graph structure. The graph is rarely operated on directly but is managed by the public interface created by the many default predicates and functions. 
-
-## Formula
-
-Provides an interface for Clause-Normal formulae that can be operated on, and queried, in a semantic way.
-
-
-# Strong vs Weak Typing for formula definitions
-
-In general, strong static typing is more useful when we will need to query the formula directly - i.e for inspecting it in some external package, whereas weak typing (in other words, enum typing) is more useful when we wish to walk the formula and produce outputs in first-order logic.
-
-For this reason, this package allows both situations. The `syntax` package defines an interface for strongly-typed syntactic expressions, which can be queried and manipulated without worrying about the underlying semantics, and the `formula` package defines a weakly typed CNF formula, which can be walked 

@@ -1,9 +1,12 @@
 use crate::syntax::{Replace, Variable};
 use std::fmt::{Debug, Display};
 
+/// A syntax node for an existential quantifier
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Existential<Right> {
+    /// The quantified variable
     pub left: Variable,
+    /// The formula for which the quantifier applies
     pub right: Right,
 }
 
