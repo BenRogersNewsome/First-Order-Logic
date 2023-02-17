@@ -12,14 +12,12 @@ use elements::{ArgumentMap, Arguments, ElementQuantifier, ElementSet, Existentia
 /// Predefined functions
 pub mod functions {
     // mod function_implementation;
-
     // pub use function_implementation::FunctionImplementation;
 }
 
 /// Predefined predicates
 pub mod predicates {
     mod conjunction;
-    // mod implies;
     // mod linked_predicate;
     // mod negation;
     mod true_for_arguments;
@@ -27,8 +25,8 @@ pub mod predicates {
     mod universally_obeyed;
 
     pub use conjunction::Conjunction;
-    // pub use implies::Implication;
     // pub use linked_predicate::LinkedPredicate;
+    // pub use negation::Negation;
     pub use true_for_arguments::TrueForArguments;
     pub use undetermined::Undetermined;
     pub use universally_obeyed::UniversallyObeyed;
