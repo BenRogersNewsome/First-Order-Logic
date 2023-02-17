@@ -241,24 +241,13 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
     fn generate_backward_map_from_forward(
         forward: [usize; TO_ARITY],
     ) -> [Option<usize>; FROM_ARITY] {
-        let mut backward = Self::init_nones();
+        let mut backward: [Option<usize>; FROM_ARITY] = [None; FROM_ARITY];
 
         for (i, &elem) in forward.iter().enumerate() {
             backward[elem] = Some(i);
         }
 
         backward
-    }
-
-    fn init_nones() -> [Option<usize>; FROM_ARITY] {
-        let mut u_nones: [std::mem::MaybeUninit<Option<usize>>; TO_ARITY] =
-            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
-
-        for elem in &mut u_nones[..] {
-            elem.write(None);
-        }
-
-        unsafe { std::mem::transmute_copy::<_, [Option<usize>; FROM_ARITY]>(&u_nones) }
     }
 
     /// Apply the map forwards.
@@ -275,7 +264,7 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
     ) -> Arguments<E, FROM_ARITY> {
         Arguments::from(self._backward.map(|oi| {
             oi.map(|i| args[i].clone())
-                .unwrap_or_else(|| default.clone()) 
+                .unwrap_or_else(|| default.clone())
         }))
     }
 }
