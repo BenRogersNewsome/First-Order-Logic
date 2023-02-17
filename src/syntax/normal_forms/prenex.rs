@@ -462,7 +462,7 @@ mod tests {
             }
             .into(),
             right: Existential {
-                left: var_z.into(),
+                left: var_z,
                 right: PredicateCall {
                     predicate: b'Q'.into(),
                     terms: vec![var_z.into()],

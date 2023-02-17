@@ -21,7 +21,7 @@ impl<R: Display> Display for Existential<R> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("∃")?;
         std::fmt::Display::fmt(&self.left, f)?;
-        f.write_str(&".")?;
+        f.write_str(".")?;
         self.right.fmt(f)?;
         Ok(())
     }

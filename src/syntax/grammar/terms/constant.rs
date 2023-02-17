@@ -13,9 +13,7 @@ pub struct Constant {
 
 impl Replace for Constant {
     #[inline]
-    fn replace(&mut self, _: Variable, _: Variable) {
-        ()
-    }
+    fn replace(&mut self, _: Variable, _: Variable) {}
 }
 
 impl Display for Constant {

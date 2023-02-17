@@ -43,19 +43,11 @@ pub enum ElementSet<'a, E> {
 
 impl<'a, E> Existential for ElementSet<'a, E> {
     fn exists(&self) -> bool {
-        if let Self::None = self {
-            false
-        } else {
-            true
-        }
+        !matches!(self, Self::None)
     }
 
     fn maximal(&self) -> bool {
-        if let Self::All = self {
-            return true;
-        } else {
-            return false;
-        }
+        matches!(self, Self::All)
     }
 }
 
@@ -67,8 +59,8 @@ impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<'a, E> {
             (Self::None, _) | (_, Self::None) => *self = Self::None,
 
             (Self::Some(x), Self::Some(y)) => {
-                let set_x: HashSet<&E> = x.into_iter().cloned().collect();
-                let set_y: HashSet<&E> = y.into_iter().cloned().collect();
+                let set_x: HashSet<&E> = x.iter().cloned().collect();
+                let set_y: HashSet<&E> = y.iter().cloned().collect();
                 *self = Self::Some(set_x.intersection(&set_y).into_iter().cloned().collect());
             }
         }
@@ -112,10 +104,6 @@ where
 {
     fn eq(&self, other: &Self) -> bool {
         self._inner.eq(&other._inner)
-    }
-
-    fn ne(&self, other: &Self) -> bool {
-        self._inner.ne(&other._inner)
     }
 }
 
@@ -285,10 +273,10 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
         args: &Arguments<E, TO_ARITY>,
         default: E,
     ) -> Arguments<E, FROM_ARITY> {
-        Arguments::from(
-            self._backward
-                .map(|oi| oi.map(|i| args[i].clone()).unwrap_or(default.clone())),
-        )
+        Arguments::from(self._backward.map(|oi| {
+            oi.map(|i| args[i].clone())
+                .unwrap_or_else(|| default.clone())
+        }))
     }
 }
 

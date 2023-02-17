@@ -52,17 +52,21 @@ impl From<Vec<PrenexNormalQuantifier>> for SkolemisationState {
                     frees_accum.push(v);
                 }
                 PrenexNormalQuantifier::Existential(v) => {
-                    if let Some(_) = state.existential_vars.insert(
-                        v,
-                        FunctionCall {
-                            function: rand::random(),
-                            terms: frees_accum
-                                .iter()
-                                .copied()
-                                .map(|v| GenericTerm::Variable(v))
-                                .collect(),
-                        },
-                    ) {
+                    if state
+                        .existential_vars
+                        .insert(
+                            v,
+                            FunctionCall {
+                                function: rand::random(),
+                                terms: frees_accum
+                                    .iter()
+                                    .copied()
+                                    .map(GenericTerm::Variable)
+                                    .collect(),
+                            },
+                        )
+                        .is_some()
+                    {
                         panic!()
                     }
                 }

@@ -14,9 +14,9 @@ use super::{PrenexNormalFormulaTerm, SkolemNormalFormula};
 /// (`{{P, Q, ...}, {R, ...}, ...}`).
 pub type ClauseNormalForm = Vec<Vec<Literal>>;
 
-impl Into<ClauseNormalForm> for ConjunctiveNormalFormula {
-    fn into(self) -> Vec<Vec<Literal>> {
-        self.clauses.into_iter().map(|x| x.literals).collect()
+impl From<ConjunctiveNormalFormula> for ClauseNormalForm {
+    fn from(f: ConjunctiveNormalFormula) -> Self {
+        f.clauses.into_iter().map(|x| x.literals).collect()
     }
 }
 
@@ -306,7 +306,7 @@ mod tests {
             }
             .into(),
             right: Existential {
-                left: var_z.into(),
+                left: var_z,
                 right: PredicateCall {
                     predicate: b'Q'.into(),
                     terms: vec![var_z.into()],
