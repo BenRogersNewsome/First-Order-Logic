@@ -9,8 +9,8 @@ use super::{Arguments, ElementQuantifier, ElementSet};
 /// A signature for preventing cycles in graph traversals.
 ///
 /// Used by implementors of [Predicate] and [Function] to prevent cycles during
-/// graph traversals. The FOL graph will in general be highly cyclic.
-pub type GraphTraversalSignature = Vec<u64>;
+/// graph traversals. The FOL graph will, in general, be highly cyclic.
+pub type GraphTraversalSignature = Vec<u64>;  // Could this be a private member?
 
 ////////////////////////////////////////////////////////////////////////////////
 // Base Traits
@@ -19,9 +19,9 @@ pub type GraphTraversalSignature = Vec<u64>;
 /// A type which can be applied to elements to produce new elements.
 pub trait Function<E: Eq, const ARITY: usize> {
     /// Call the function with the specified args.
-    fn call_for_element(
+    fn call_for_args(
         &self,
-        elements: [E; ARITY],
+        args: &Arguments<ElementQuantifier<E>, ARITY>,
         sig: &mut GraphTraversalSignature,
     ) -> ElementValue<&E>;
 }
@@ -133,15 +133,17 @@ impl<T> RawGraphNode<T> {
 }
 
 impl<'a, T: 'a> RawGraphNode<T> {
+    /// SAFETY: We wrap the old inner with the new inner so that there is no
+    /// duplication. We use a creator callback so that we never expose a
+    /// dangling reference to the internal type. The use of `Fn` ensures that
+    /// the callback cannot expose the internal struct to external code.
     pub fn replace<Callback>(&self, creator: Callback)
     where
-        Callback: Fn(T) -> T,
+    Callback: Fn(T) -> T,
     {
-        // SAFETY: We wrap the old inner with the new inner so that there is no
-        // duplication. We use a creator callback so that we never expose a
-        // dangling reference to the internal type. The use of `Fn` ensures that
-        // the callback cannot expose the internal struct to external code.
         // TODO: Is this safe with the bound as an Fn?
+        // I am fairly certain it is unsafe as FnOnce or FnMut
+        // Maybe a fn(T) -> T would be better?
         unsafe {
             let inner_mut: &mut T = &mut *self._raw.get();
             let inner: T = std::ptr::read(inner_mut);
@@ -187,11 +189,17 @@ impl<E, const ARITY: usize> Predicate<E, ARITY> for PredicateNode<E, ARITY> {
     }
 
     fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+        // Safety: We use unsafe code to get a reference to the inner element,
+        // but we immediately consume the reference, and return a value which
+        // doesn't reference the inner element.
         let inner: &dyn Predicate<E, ARITY> = unsafe { self.get_inner_as_ref() }.as_ref();
         inner.get_elements_for_true()
     }
 
     fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+        // Safety: We use unsafe code to get a reference to the inner element,
+        // but we immediately consume the reference, and return a value which
+        // doesn't reference the inner element.
         let inner: &dyn Predicate<E, ARITY> = unsafe { self.get_inner_as_ref() }.as_ref();
         inner.get_elements_for_false()
     }
@@ -214,12 +222,15 @@ impl<E: Clone, const ARITY: usize> Default for PredicateNode<E, ARITY> {
 pub type FunctionNode<E, const ARITY: usize> = GraphNode<Box<dyn Function<E, ARITY>>>;
 
 impl<E: Eq, const ARITY: usize> Function<E, ARITY> for FunctionNode<E, ARITY> {
-    fn call_for_element(
+    fn call_for_args(
         &self,
-        elements: [E; ARITY],
+        args: &Arguments<ElementQuantifier<E>, ARITY>,
         sig: &mut GraphTraversalSignature,
     ) -> ElementValue<&E> {
+        // Safety: We use unsafe code to get a reference to the inner element,
+        // but we immediately consume the reference, and return a value which
+        // doesn't reference the inner element.
         let inner = unsafe { self.get_inner_as_ref() }.as_ref();
-        inner.call_for_element(elements, sig)
+        inner.call_for_args(args, sig)
     }
 }
