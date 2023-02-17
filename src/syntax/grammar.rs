@@ -83,11 +83,10 @@ mod terms {
 
     use super::Replace;
 
-
     /// A dynamically typed formula term.
     #[derive(Debug, Clone, PartialEq, Eq)]
     pub enum GenericTerm {
-        /// A variable 
+        /// A variable
         Variable(Variable),
         /// A constant
         Constant(Constant),

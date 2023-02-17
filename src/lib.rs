@@ -1,14 +1,13 @@
 //! An implementation of first-order logic.
-//! 
+//!
 //! The [`syntax`](syntax) portion of this crate contains a grammar for first order logic,
 //! as well as utilities for manipulating FOL statements, and converting
 //! statements into a number of normal forms (Prenex normal form, Skolem normal
 //! form, etc.).
-//! 
+//!
 //! The [`semantics`](semantics) portion of this crate contains an in-memory graph structure
 //! for applying logical statements, in a self-consistent way, and making
 //! logical queries.
-
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(missing_docs)]

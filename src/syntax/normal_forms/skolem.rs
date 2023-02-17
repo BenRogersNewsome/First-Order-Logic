@@ -1,19 +1,11 @@
 use std::collections::HashMap;
 
 use crate::syntax::{
-    Conjunction,
-    Constant,
-    Disjunction,
-    Equality,
-    GenericAtomicFormula,
-    GenericTerm,
-    Implication,
-    Negation,
-    PredicateCall,
-    Variable, FunctionCall,
+    Conjunction, Constant, Disjunction, Equality, FunctionCall, GenericAtomicFormula, GenericTerm,
+    Implication, Negation, PredicateCall, Variable,
 };
 
-use super::{PrenexNormalFormulaTerm, PrenexNormalFormula, PrenexNormalQuantifier};
+use super::{PrenexNormalFormula, PrenexNormalFormulaTerm, PrenexNormalQuantifier};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Skolem-Normal Formula
@@ -33,9 +25,7 @@ impl<T: Into<PrenexNormalFormula>> From<T> for SkolemNormalFormula {
 
         let terms = prenex.formula.skolemise(&skol_state);
 
-        Self {
-            terms,
-        }
+        Self { terms }
     }
 }
 
@@ -51,7 +41,6 @@ impl SkolemisationState {
 
 impl From<Vec<PrenexNormalQuantifier>> for SkolemisationState {
     fn from(quants: Vec<PrenexNormalQuantifier>) -> Self {
-        
         let mut frees_accum: Vec<Variable> = Vec::new();
         let mut state: Self = Self {
             existential_vars: HashMap::new(),
@@ -61,14 +50,18 @@ impl From<Vec<PrenexNormalQuantifier>> for SkolemisationState {
             match quant {
                 PrenexNormalQuantifier::Universal(v) => {
                     frees_accum.push(v);
-                },
+                }
                 PrenexNormalQuantifier::Existential(v) => {
                     if let Some(_) = state.existential_vars.insert(
                         v,
                         FunctionCall {
                             function: rand::random(),
-                            terms: frees_accum.iter().copied().map(|v| GenericTerm::Variable(v)).collect(),
-                        }
+                            terms: frees_accum
+                                .iter()
+                                .copied()
+                                .map(|v| GenericTerm::Variable(v))
+                                .collect(),
+                        },
                     ) {
                         panic!()
                     }
@@ -148,7 +141,8 @@ impl Skolemise for Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>
         Self {
             left: self.left.skolemise(state),
             right: self.right.skolemise(state),
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -159,7 +153,8 @@ impl Skolemise for Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>
         Self {
             left: self.left.skolemise(state),
             right: self.right.skolemise(state),
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -170,7 +165,8 @@ impl Skolemise for Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>
         Self {
             left: self.left.skolemise(state),
             right: self.right.skolemise(state),
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -180,7 +176,8 @@ impl Skolemise for Negation<PrenexNormalFormulaTerm> {
     fn skolemise(self, state: &SkolemisationState) -> Self::Output {
         Self {
             right: self.right.skolemise(state),
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -188,7 +185,7 @@ impl Skolemise for PredicateCall<GenericTerm> {
     type Output = GenericAtomicFormula;
 
     fn skolemise(mut self, state: &SkolemisationState) -> Self::Output {
-        self.terms = self.terms.into_iter().map(|t|t.skolemise(state)).collect();
+        self.terms = self.terms.into_iter().map(|t| t.skolemise(state)).collect();
         self.into()
     }
 }
@@ -200,7 +197,8 @@ impl Skolemise for Equality<GenericTerm, GenericTerm> {
         Self {
             left: self.left.skolemise(state),
             right: self.right.skolemise(state),
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -216,7 +214,7 @@ impl Skolemise for FunctionCall<GenericTerm> {
     type Output = GenericTerm;
 
     fn skolemise(mut self, state: &SkolemisationState) -> Self::Output {
-        self.terms = self.terms.into_iter().map(|t|t.skolemise(state)).collect();
+        self.terms = self.terms.into_iter().map(|t| t.skolemise(state)).collect();
         self.into()
     }
 }

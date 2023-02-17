@@ -2,7 +2,6 @@ use std::fmt::Display;
 
 use crate::syntax::{grammar::terms::Variable, Replace};
 
-
 /// A syntax node for an equality between to other nodes.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Equality<Left, Right> {

@@ -12,7 +12,7 @@ pub struct Variable {
 impl Variable {
     /// Create a new variable from a u64
     /// # Examples
-    /// 
+    ///
     /// ```
     /// # use first_order_logic::syntax::grammer::Variable;
     /// let var_x: Variable = Variable::new(b"x".into());
@@ -23,9 +23,9 @@ impl Variable {
 
     /// Create a variable with a random label. Useful for variable replacements
     /// in when combining formula, to prevent variable collisions.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// # use first_order_logic::syntax::grammer::Variable;
     /// let var_x: Variable = Variable::rand();

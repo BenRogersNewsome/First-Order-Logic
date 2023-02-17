@@ -1,8 +1,7 @@
 use std::{fmt::Display, ops::Not};
 
 use crate::syntax::{
-    Conjunction, Disjunction, GenericAtomicFormula, GenericFormula, Implication,
-    Replace, Variable,
+    Conjunction, Disjunction, GenericAtomicFormula, GenericFormula, Implication, Replace, Variable,
 };
 
 use super::super::grammar::{Existential, Negation, Universal};
@@ -131,7 +130,7 @@ impl Display for PrenexNormalFormulaTerm {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// A leading quantifier in a PNF formula.
-/// 
+///
 /// Used in [PrenexNormalFormula] in the leading quantifiers.
 #[derive(Clone, Copy)]
 pub enum PrenexNormalQuantifier {

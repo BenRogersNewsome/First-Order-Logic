@@ -1,11 +1,14 @@
-use std::{ops::{BitOr, BitAnd}, fmt::Display};
+use std::{
+    fmt::Display,
+    ops::{BitAnd, BitOr},
+};
 
-use crate::syntax::{Negation, GenericAtomicFormula, Conjunction, Disjunction, Implication};
+use crate::syntax::{Conjunction, Disjunction, GenericAtomicFormula, Implication, Negation};
 
 use super::{PrenexNormalFormulaTerm, SkolemNormalFormula};
 
 /// A Clause normal Form (CNF).
-/// 
+///
 /// Semantically equivalent to a conjunctive normal form
 /// (`(P ∨ Q ∨ ...) ∧ (R ∨ ...) ∧ `), only expressed as a set of sets
 /// (`{{P, Q, ...}, {R, ...}, ...}`).
@@ -13,14 +16,12 @@ pub type ClauseNormalForm = Vec<Vec<Literal>>;
 
 impl Into<ClauseNormalForm> for ConjunctiveNormalFormula {
     fn into(self) -> Vec<Vec<Literal>> {
-        self.clauses.into_iter().map(|x| {
-            x.literals
-        }).collect()
+        self.clauses.into_iter().map(|x| x.literals).collect()
     }
 }
 
 /// A formula in Conjunctive Normal Form.
-/// 
+///
 /// A formula of the form `(P ∨ Q ∨ ...) ∧ (R ∨ ...) ∧ ...`
 #[derive(Clone)]
 pub struct ConjunctiveNormalFormula {
@@ -41,10 +42,11 @@ impl BitAnd for ConjunctiveNormalFormula {
     type Output = Self;
     fn bitand(self, rhs: Self) -> Self::Output {
         Self {
-            clauses: self.clauses.into_iter()
-                .chain(
-                    rhs.clauses.into_iter()
-                ).collect()
+            clauses: self
+                .clauses
+                .into_iter()
+                .chain(rhs.clauses.into_iter())
+                .collect(),
         }
     }
 }
@@ -62,7 +64,7 @@ impl Display for ConjunctiveNormalFormula {
             };
             first = false;
             term.fmt(f)?;
-        };
+        }
 
         if self.clauses.len() > 1 {
             f.write_str(")")?;
@@ -72,7 +74,7 @@ impl Display for ConjunctiveNormalFormula {
 }
 
 /// A clause of literals.
-/// 
+///
 /// A flat disjunction of the form `A ∨ B ∨ ...`.
 #[derive(Clone)]
 pub struct Clause {
@@ -93,7 +95,7 @@ impl Display for Clause {
             };
             first = false;
             term.fmt(f)?;
-        };
+        }
 
         if self.literals.len() > 1 {
             f.write_str(")")?;
@@ -108,10 +110,11 @@ impl BitOr for Clause {
     type Output = Self;
     fn bitor(self, rhs: Self) -> Self::Output {
         Self {
-            literals: self.literals.into_iter()
-                .chain(
-                    rhs.literals.into_iter()
-                ).collect()
+            literals: self
+                .literals
+                .into_iter()
+                .chain(rhs.literals.into_iter())
+                .collect(),
         }
     }
 }
@@ -129,12 +132,8 @@ impl Literal {
     /// Negate a literal, returning the new literal.
     pub fn negate(&self) -> Self {
         match self {
-            Self::Atom(x) => {
-                Self::Negated(Negation { right: x.clone() })
-            },
-            Self::Negated(Negation { right: x }) => {
-                Self::Atom(x.clone())
-            },
+            Self::Atom(x) => Self::Negated(Negation { right: x.clone() }),
+            Self::Negated(Negation { right: x }) => Self::Atom(x.clone()),
         }
     }
 }
@@ -142,7 +141,7 @@ impl Literal {
 impl Display for Literal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self {
-            Self::Atom(x) => {x.fmt(f)},
+            Self::Atom(x) => x.fmt(f),
             Self::Negated(x) => x.fmt(f),
         }
     }
@@ -166,51 +165,70 @@ impl From<PrenexNormalFormulaTerm> for ConjunctiveNormalFormula {
 }
 
 #[doc(hidden)]
-impl From<Conjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>> for ConjunctiveNormalFormula {
-    fn from(f: Conjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>) -> ConjunctiveNormalFormula {
+impl From<Conjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>>
+    for ConjunctiveNormalFormula
+{
+    fn from(
+        f: Conjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>,
+    ) -> ConjunctiveNormalFormula {
         f.left & f.right
     }
 }
 
 #[doc(hidden)]
-impl From<Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for ConjunctiveNormalFormula {
-    fn from(f: Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>) -> ConjunctiveNormalFormula {
+impl From<Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
+    for ConjunctiveNormalFormula
+{
+    fn from(
+        f: Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>,
+    ) -> ConjunctiveNormalFormula {
         Conjunction::<ConjunctiveNormalFormula, ConjunctiveNormalFormula> {
             left: f.left.into(),
             right: f.right.into(),
-        }.into()
+        }
+        .into()
     }
 }
 
 #[doc(hidden)]
-impl From<Disjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>> for ConjunctiveNormalFormula {
-    fn from(f: Disjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>) -> ConjunctiveNormalFormula {
-        let mut terms: Vec<Clause> = Vec::with_capacity(f.left.clauses.len() * f.right.clauses.len());
+impl From<Disjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>>
+    for ConjunctiveNormalFormula
+{
+    fn from(
+        f: Disjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>,
+    ) -> ConjunctiveNormalFormula {
+        let mut terms: Vec<Clause> =
+            Vec::with_capacity(f.left.clauses.len() * f.right.clauses.len());
 
         for l_term in &f.left.clauses {
             for r_term in &f.right.clauses {
                 terms.push(l_term.clone() | r_term.clone())
-            };
-        };
-
-        ConjunctiveNormalFormula {
-            clauses: terms,
+            }
         }
+
+        ConjunctiveNormalFormula { clauses: terms }
     }
 }
 
 #[doc(hidden)]
-impl From<Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for ConjunctiveNormalFormula {
-    fn from(f: Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>) -> ConjunctiveNormalFormula {
+impl From<Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
+    for ConjunctiveNormalFormula
+{
+    fn from(
+        f: Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>,
+    ) -> ConjunctiveNormalFormula {
         Disjunction::<ConjunctiveNormalFormula, ConjunctiveNormalFormula> {
             left: f.left.into(),
             right: f.right.into(),
-        }.into()
+        }
+        .into()
     }
 }
 
 #[doc(hidden)]
-impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm> {
+impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
+    for Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>
+{
     fn from(f: Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>) -> Self {
         Disjunction {
             left: Negation { right: f.left }.into(),
@@ -220,7 +238,9 @@ impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for Dis
 }
 
 #[doc(hidden)]
-impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>> for ConjunctiveNormalFormula {
+impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
+    for ConjunctiveNormalFormula
+{
     fn from(f: Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>) -> Self {
         Disjunction::<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>::from(f).into()
     }
@@ -233,8 +253,8 @@ impl From<Negation<ConjunctiveNormalFormula>> for ConjunctiveNormalFormula {
         for conjuncted in &mut right.clauses {
             for disjuncted in &mut conjuncted.literals {
                 *disjuncted = disjuncted.negate()
-            } 
-        };
+            }
+        }
         right
     }
 }
@@ -243,15 +263,17 @@ impl From<Negation<ConjunctiveNormalFormula>> for ConjunctiveNormalFormula {
 impl From<Negation<PrenexNormalFormulaTerm>> for ConjunctiveNormalFormula {
     fn from(f: Negation<PrenexNormalFormulaTerm>) -> ConjunctiveNormalFormula {
         Negation::<ConjunctiveNormalFormula> {
-            right: f.right.into()
-        }.into()
+            right: f.right.into(),
+        }
+        .into()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::syntax::{
-        Conjunction, Disjunction, Existential, GenericFormula, PredicateCall, Universal, Variable, normal_forms::{PrenexNormalFormula, ConjunctiveNormalFormula, SkolemNormalFormula},
+        normal_forms::{ConjunctiveNormalFormula, PrenexNormalFormula, SkolemNormalFormula},
+        Conjunction, Disjunction, Existential, GenericFormula, PredicateCall, Universal, Variable,
     };
 
     #[test]

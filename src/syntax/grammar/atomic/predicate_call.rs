@@ -2,7 +2,6 @@ use std::fmt::Display;
 
 use crate::syntax::{grammar::terms::Variable, Replace};
 
-
 /// A syntax node for a predicate call.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PredicateCall<T> {

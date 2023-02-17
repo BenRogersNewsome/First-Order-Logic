@@ -10,7 +10,7 @@ use super::{Arguments, ElementQuantifier, ElementSet};
 ///
 /// Used by implementors of [Predicate] and [Function] to prevent cycles during
 /// graph traversals. The FOL graph will, in general, be highly cyclic.
-pub type GraphTraversalSignature = Vec<u64>;  // Could this be a private member?
+pub type GraphTraversalSignature = Vec<u64>; // Could this be a private member?
 
 ////////////////////////////////////////////////////////////////////////////////
 // Base Traits
@@ -139,7 +139,7 @@ impl<'a, T: 'a> RawGraphNode<T> {
     /// the callback cannot expose the internal struct to external code.
     pub fn replace<Callback>(&self, creator: Callback)
     where
-    Callback: Fn(T) -> T,
+        Callback: Fn(T) -> T,
     {
         // TODO: Is this safe with the bound as an Fn?
         // I am fairly certain it is unsafe as FnOnce or FnMut
