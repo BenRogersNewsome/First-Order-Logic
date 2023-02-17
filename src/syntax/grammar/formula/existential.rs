@@ -1,9 +1,12 @@
 use crate::syntax::{Replace, Variable};
 use std::fmt::{Debug, Display};
 
+/// A syntax node for an existential quantifier
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Existential<Right> {
+    /// The quantified variable
     pub left: Variable,
+    /// The formula for which the quantifier applies
     pub right: Right,
 }
 
@@ -18,7 +21,7 @@ impl<R: Display> Display for Existential<R> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("∃")?;
         std::fmt::Display::fmt(&self.left, f)?;
-        f.write_str(&".")?;
+        f.write_str(".")?;
         self.right.fmt(f)?;
         Ok(())
     }

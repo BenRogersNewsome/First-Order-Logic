@@ -4,9 +4,12 @@ use crate::syntax::Replace;
 
 use super::variable::Variable;
 
+/// A syntax node for a function call, such as `f(x, y)`
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FunctionCall<T> {
+    /// The label of the function - the 'f' in `f(x, y)`
     pub function: u64,
+    /// The terms to call the function with - 'x' and 'y' in `f(x, y)`
     pub terms: Vec<T>,
 }
 

@@ -51,7 +51,7 @@ impl Deref for TruthValue {
     type Target = bool;
     fn deref(&self) -> &Self::Target {
         match self {
-            Self::Determined(b) => &b,
+            Self::Determined(b) => b,
             Self::Undetermined => &false,
         }
     }

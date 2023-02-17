@@ -2,9 +2,12 @@ use std::fmt::Display;
 
 use crate::syntax::{grammar::terms::Variable, Replace};
 
+/// A syntax node for the conjunction between two formula
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Conjunction<Left, Right> {
+    /// The left formula
     pub left: Left,
+    /// The right formula
     pub right: Right,
 }
 

@@ -31,7 +31,7 @@ impl<
     /// Create a predicate node from the conjunction of two other nodes, given
     /// the specified argument maps between the conjunction node and the
     /// operand nodes.
-    pub fn new(
+    pub fn create(
         left: &PredicateNode<E, L_ARITY>,
         map_left: ArgumentMap<C_ARITY, L_ARITY>,
         right: &PredicateNode<E, R_ARITY>,

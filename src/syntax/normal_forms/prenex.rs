@@ -1,8 +1,7 @@
 use std::{fmt::Display, ops::Not};
 
 use crate::syntax::{
-    Conjunction, Disjunction, GenericAtomicFormula, GenericFormula, Implication,
-    Replace, Variable,
+    Conjunction, Disjunction, GenericAtomicFormula, GenericFormula, Implication, Replace, Variable,
 };
 
 use super::super::grammar::{Existential, Negation, Universal};
@@ -11,13 +10,11 @@ use super::super::grammar::{Existential, Negation, Universal};
 // PrenexNormalFormula
 ////////////////////////////////////////////////////////////////////////////////
 
-/// A formula structure for a formula that is in Prenex-Normal Form (PNF's).
-///
-/// `quantifiers` is a reverse ordered list of the PNF's leading quantifiers.
+/// A formula in Prenex-Normal Form (PNF).
 pub struct PrenexNormalFormula {
-    /// The leading quantifiers for the PNF
+    /// A reverse-ordered list of the PNF's leading quantifiers.
     pub quantifiers: Vec<PrenexNormalQuantifier>,
-    /// The terms of the PNF (without quantifiers)
+    /// The rest of the terms in the PNF
     pub formula: PrenexNormalFormulaTerm,
 }
 
@@ -25,8 +22,8 @@ impl PrenexNormalFormula {
     /// Replace every variable in the formula with a new randomly-named
     /// variable.
     ///
-    /// This is to prevent variable collisions when formulae are combined
-    /// together.
+    /// This is to prevent variable collisions when quantifiers are pulled out
+    /// of the formula from multiple sub-formula.
     pub fn replace_all_vars(&mut self) {
         self.quantifiers.iter_mut().for_each(|q| {
             let new_var = Variable::rand();
@@ -82,6 +79,7 @@ impl From<GenericAtomicFormula> for PrenexNormalFormulaTerm {
     }
 }
 
+#[doc(hidden)]
 impl From<Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
     for PrenexNormalFormulaTerm
 {
@@ -90,6 +88,7 @@ impl From<Conjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
     }
 }
 
+#[doc(hidden)]
 impl From<Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
     for PrenexNormalFormulaTerm
 {
@@ -98,6 +97,7 @@ impl From<Disjunction<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
     }
 }
 
+#[doc(hidden)]
 impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
     for PrenexNormalFormulaTerm
 {
@@ -106,6 +106,7 @@ impl From<Implication<PrenexNormalFormulaTerm, PrenexNormalFormulaTerm>>
     }
 }
 
+#[doc(hidden)]
 impl From<Negation<PrenexNormalFormulaTerm>> for PrenexNormalFormulaTerm {
     fn from(f: Negation<PrenexNormalFormulaTerm>) -> Self {
         Self::Negation(Box::new(f))
@@ -129,8 +130,8 @@ impl Display for PrenexNormalFormulaTerm {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// A leading quantifier in a PNF formula.
-/// 
-/// Used in [PrenexNormalFormula] as the leading quantifiers.
+///
+/// Used in [PrenexNormalFormula] in the leading quantifiers.
 #[derive(Clone, Copy)]
 pub enum PrenexNormalQuantifier {
     /// A universal quantifier over a variable
@@ -158,6 +159,7 @@ impl Display for PrenexNormalQuantifier {
     }
 }
 
+/// Turns a universal into an existential and vice-versa.
 impl Not for &PrenexNormalQuantifier {
     type Output = PrenexNormalQuantifier;
     fn not(self) -> Self::Output {
@@ -460,7 +462,7 @@ mod tests {
             }
             .into(),
             right: Existential {
-                left: var_z.into(),
+                left: var_z,
                 right: PredicateCall {
                     predicate: b'Q'.into(),
                     terms: vec![var_z.into()],

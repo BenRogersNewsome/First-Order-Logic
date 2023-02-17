@@ -43,19 +43,11 @@ pub enum ElementSet<'a, E> {
 
 impl<'a, E> Existential for ElementSet<'a, E> {
     fn exists(&self) -> bool {
-        if let Self::None = self {
-            false
-        } else {
-            true
-        }
+        !matches!(self, Self::None)
     }
 
     fn maximal(&self) -> bool {
-        if let Self::All = self {
-            return true;
-        } else {
-            return false;
-        }
+        matches!(self, Self::All)
     }
 }
 
@@ -67,8 +59,8 @@ impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<'a, E> {
             (Self::None, _) | (_, Self::None) => *self = Self::None,
 
             (Self::Some(x), Self::Some(y)) => {
-                let set_x: HashSet<&E> = x.into_iter().cloned().collect();
-                let set_y: HashSet<&E> = y.into_iter().cloned().collect();
+                let set_x: HashSet<&E> = x.iter().cloned().collect();
+                let set_y: HashSet<&E> = y.iter().cloned().collect();
                 *self = Self::Some(set_x.intersection(&set_y).into_iter().cloned().collect());
             }
         }
@@ -112,10 +104,6 @@ where
 {
     fn eq(&self, other: &Self) -> bool {
         self._inner.eq(&other._inner)
-    }
-
-    fn ne(&self, other: &Self) -> bool {
-        self._inner.ne(&other._inner)
     }
 }
 
@@ -253,24 +241,13 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
     fn generate_backward_map_from_forward(
         forward: [usize; TO_ARITY],
     ) -> [Option<usize>; FROM_ARITY] {
-        let mut backward = Self::init_nones();
+        let mut backward: [Option<usize>; FROM_ARITY] = [None; FROM_ARITY];
 
         for (i, &elem) in forward.iter().enumerate() {
             backward[elem] = Some(i);
         }
 
         backward
-    }
-
-    fn init_nones() -> [Option<usize>; FROM_ARITY] {
-        let mut u_nones: [std::mem::MaybeUninit<Option<usize>>; TO_ARITY] =
-            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
-
-        for elem in &mut u_nones[..] {
-            elem.write(None);
-        }
-
-        unsafe { std::mem::transmute_copy::<_, [Option<usize>; FROM_ARITY]>(&u_nones) }
     }
 
     /// Apply the map forwards.
@@ -285,10 +262,10 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
         args: &Arguments<E, TO_ARITY>,
         default: E,
     ) -> Arguments<E, FROM_ARITY> {
-        Arguments::from(
-            self._backward
-                .map(|oi| oi.map(|i| args[i].clone()).unwrap_or(default.clone())),
-        )
+        Arguments::from(self._backward.map(|oi| {
+            oi.map(|i| args[i].clone())
+                .unwrap_or_else(|| default.clone())
+        }))
     }
 }
 
@@ -314,7 +291,7 @@ macro_rules! args {
 /// # Examples
 ///
 /// ```
-/// # use first_order_logic::{elements::ArgumentMap, one_to_one};
+/// # use first_order_logic::{semantics::elements::ArgumentMap, one_to_one};
 /// let one_to_one_map: ArgumentMap<1,1> = one_to_one!();
 /// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "semantics")))]

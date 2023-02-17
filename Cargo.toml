@@ -11,10 +11,9 @@ bimap = "0.6.2"
 enum_dispatch = " 0.3.11"
 
 [features]
-default=["semantics", "syntax", "formula"]
+default=["semantics", "syntax"]
 semantics=[]
 syntax=[]
-formula=["semantics"]
 
 # docs.rs-specific configuration
 [package.metadata.docs.rs]
