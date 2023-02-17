@@ -30,10 +30,9 @@ pub struct ConjunctiveNormalFormula {
 }
 
 /// Convert a formula, in any other form, into its CNF.
-impl<T: Into<SkolemNormalFormula>> From<T> for ConjunctiveNormalFormula {
-    fn from(f: T) -> Self {
-        let skolem: SkolemNormalFormula = f.into();
-        skolem.terms.into()
+impl From<SkolemNormalFormula> for ConjunctiveNormalFormula {
+    fn from(f: SkolemNormalFormula) -> Self {
+        f.terms.into()
     }
 }
 
@@ -164,6 +163,16 @@ impl From<PrenexNormalFormulaTerm> for ConjunctiveNormalFormula {
     }
 }
 
+impl From<GenericAtomicFormula> for ConjunctiveNormalFormula {
+    fn from(f: GenericAtomicFormula) -> Self {
+        Self {
+            clauses: vec![Clause {
+                literals: vec![Literal::Atom(f)],
+            }],
+        }
+    }
+}
+
 #[doc(hidden)]
 impl From<Conjunction<ConjunctiveNormalFormula, ConjunctiveNormalFormula>>
     for ConjunctiveNormalFormula
@@ -277,7 +286,7 @@ mod tests {
     };
 
     #[test]
-    fn test_pnf() {
+    fn test_cnf() {
         let var_x = Variable::new(b'x'.into());
         let var_y = Variable::new(b'y'.into());
         let var_z = Variable::new(b'z'.into());
