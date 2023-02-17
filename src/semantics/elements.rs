@@ -275,7 +275,7 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
     ) -> Arguments<E, FROM_ARITY> {
         Arguments::from(self._backward.map(|oi| {
             oi.map(|i| args[i].clone())
-                .unwrap_or_else(|| default.clone())
+                .unwrap_or_else(|| default.clone()) 
         }))
     }
 }
@@ -302,7 +302,7 @@ macro_rules! args {
 /// # Examples
 ///
 /// ```
-/// # use first_order_logic::{elements::ArgumentMap, one_to_one};
+/// # use first_order_logic::{semantics::elements::ArgumentMap, one_to_one};
 /// let one_to_one_map: ArgumentMap<1,1> = one_to_one!();
 /// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "semantics")))]

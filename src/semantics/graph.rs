@@ -173,8 +173,9 @@ impl<T> From<T> for RawGraphNode<T> {
 /// # Examples
 ///
 /// ```
+/// # use first_order_logic::semantics::PredicateNode;
 /// // A binary predicate
-/// let predicate_a: PredicateNode<Item, [Item; 2]> = PredicateNode::default();
+/// let predicate_a: PredicateNode<(), 2> = PredicateNode::default();
 /// ```
 pub type PredicateNode<E, const ARITY: usize> = GraphNode<Box<dyn Predicate<E, ARITY>>>;
 

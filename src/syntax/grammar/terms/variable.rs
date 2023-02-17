@@ -14,8 +14,8 @@ impl Variable {
     /// # Examples
     ///
     /// ```
-    /// # use first_order_logic::syntax::grammer::Variable;
-    /// let var_x: Variable = Variable::new(b"x".into());
+    /// # use first_order_logic::syntax::Variable;
+    /// let var_x: Variable = Variable::new(b'x'.into());
     /// ```
     pub fn new(label: u64) -> Self {
         Self::from(label)
@@ -27,7 +27,7 @@ impl Variable {
     /// # Examples
     ///
     /// ```
-    /// # use first_order_logic::syntax::grammer::Variable;
+    /// # use first_order_logic::syntax::Variable;
     /// let var_x: Variable = Variable::rand();
     /// ```
     pub fn rand() -> Self {
