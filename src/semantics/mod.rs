@@ -18,15 +18,17 @@ pub mod functions {
 /// Predefined predicates
 pub mod predicates {
     mod conjunction;
+    // mod disjunction;
     // mod linked_predicate;
-    // mod negation;
+    mod negation;
     mod true_for_arguments;
     mod undetermined;
     mod universally_obeyed;
 
     pub use conjunction::Conjunction;
+    // pub use disjunction::Disjunction;
     // pub use linked_predicate::LinkedPredicate;
-    // pub use negation::Negation;
+    pub use negation::Negation;
     pub use true_for_arguments::TrueForArguments;
     pub use undetermined::Undetermined;
     pub use universally_obeyed::UniversallyObeyed;
