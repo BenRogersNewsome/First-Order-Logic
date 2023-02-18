@@ -19,7 +19,7 @@ pub mod functions {
 pub mod predicates {
     mod conjunction;
     mod disjunction;
-    // mod linked_predicate;
+    mod linked_predicate;
     mod negation;
     mod true_for_arguments;
     mod undetermined;
@@ -27,7 +27,7 @@ pub mod predicates {
 
     pub use conjunction::Conjunction;
     pub use disjunction::Disjunction;
-    // pub use linked_predicate::LinkedPredicate;
+    pub use linked_predicate::LinkedPredicate;
     pub use negation::Negation;
     pub use true_for_arguments::TrueForArguments;
     pub use undetermined::Undetermined;
