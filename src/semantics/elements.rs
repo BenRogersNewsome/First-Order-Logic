@@ -38,16 +38,16 @@ impl<E> From<E> for ElementQuantifier<E> {
 /// range of elements for passing to a predicate, whereas `ElementSet`
 /// corresponds to an explicit list of elements.
 #[derive(Clone, Debug)]
-pub enum ElementSet<'a, E> {
+pub enum ElementSet<E> {
     /// Every element in the DOD.
     All,
     /// A list of specific elements in the DOD.
-    Some(Vec<&'a E>),
+    Some(Vec<E>),
     /// Zero elements in the DOD.
     None,
 }
 
-impl<'a, E> Existential for ElementSet<'a, E> {
+impl<E> Existential for ElementSet<E> {
     fn exists(&self) -> bool {
         !matches!(self, Self::None)
     }
@@ -57,7 +57,7 @@ impl<'a, E> Existential for ElementSet<'a, E> {
     }
 }
 
-impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<'a, E> {
+impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<E> {
     fn bitand_assign(&mut self, rhs: Self) {
         match (&*self, &rhs) {
             (&Self::All, x) | (x, &Self::All) => *self = x.clone(),
@@ -65,20 +65,22 @@ impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<'a, E> {
             (Self::None, _) | (_, Self::None) => *self = Self::None,
 
             (Self::Some(x), Self::Some(y)) => {
-                let set_x: HashSet<&E> = x.iter().cloned().collect();
-                let set_y: HashSet<&E> = y.iter().cloned().collect();
+                let set_x: HashSet<E> = x.iter().cloned().collect();
+                let set_y: HashSet<E> = y.iter().cloned().collect();
                 *self = Self::Some(set_x.intersection(&set_y).into_iter().cloned().collect());
             }
         }
     }
 }
 
-impl<'a, E: Clone> BitOrAssign for ElementSet<'a, E> {
+impl<'a, E: Clone> BitOrAssign for ElementSet<E> {
     fn bitor_assign(&mut self, rhs: Self) {
-        match (&*self, &rhs) {
+        match (&*self, rhs) {
             (Self::All, _) | (_, Self::All) => *self = Self::All,
 
-            (Self::None, x) | (x, Self::None) => *self = x.clone(),
+            (Self::None, x) => *self = x,
+
+            (x, Self::None) => *self = x.clone(),
 
             (Self::Some(_), Self::Some(y)) => {
                 if let Self::Some(x) = self {
@@ -102,6 +104,14 @@ impl<'a, E: Clone> BitOrAssign for ElementSet<'a, E> {
 #[derive(Debug)]
 pub struct Arguments<E, const ARITY: usize> {
     _inner: [E; ARITY],
+}
+
+impl<E, const ARITY: usize> Arguments<E, ARITY> {
+    /// Convert arguments from one type to another using a callback function
+    /// applied to each arg.
+    pub fn map<F>(self, callback: fn(args: E) -> F) -> Arguments<F, ARITY> {
+        Arguments::from(self._inner.map(callback))
+    }
 }
 
 impl<E, const ARITY: usize> PartialEq for Arguments<E, ARITY>
@@ -282,7 +292,7 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
 /// # use first_order_logic::{args, semantics::elements::Arguments};
 /// let args: Arguments<usize, 3> = args!(3 as usize, 6 as usize, 4 as usize);
 /// ```
-/// 
+///
 /// Automatically performs the conversion when used with `ElementQuantifier`:
 /// ```
 /// # use first_order_logic::{args, semantics::elements::{Arguments, ElementQuantifier}};

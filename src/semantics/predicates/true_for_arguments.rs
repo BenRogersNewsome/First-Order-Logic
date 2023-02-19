@@ -13,7 +13,7 @@ pub struct TrueForArguments<E, const ARITY: usize> {
     inner: Box<dyn Predicate<E, ARITY>>,
 }
 
-impl<E: Eq, const ARITY: usize> Predicate<E, ARITY> for TrueForArguments<E, ARITY> {
+impl<E: Eq + Clone, const ARITY: usize> Predicate<E, ARITY> for TrueForArguments<E, ARITY> {
     fn call_for_elements(
         &self,
         arguments: &Arguments<ElementQuantifier<E>, ARITY>,
@@ -31,14 +31,24 @@ impl<E: Eq, const ARITY: usize> Predicate<E, ARITY> for TrueForArguments<E, ARIT
         &self,
         sig: &mut GraphTraversalSignature,
     ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
-        todo!()
+        self.inner.get_elements_for_false(sig)
     }
 
     fn get_elements_for_true(
         &self,
         sig: &mut GraphTraversalSignature,
     ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
-        todo!()
+        self.arguments
+            .iter()
+            .cloned()
+            .map(|args| {
+                args.map::<ElementSet<E>>(|e| match e {
+                    ElementQuantifier::One(x) => ElementSet::Some(vec![x]),
+                    ElementQuantifier::Any => ElementSet::All,
+                })
+            })
+            .chain(self.inner.get_elements_for_true(sig).into_iter())
+            .collect()
     }
 }
 
