@@ -16,11 +16,17 @@ impl<E: Clone, const ARITY: usize> Predicate<E, ARITY> for Undetermined {
         TruthValue::Undetermined
     }
 
-    fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+    fn get_elements_for_false(
+        &self,
+        _: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
         vec![]
     }
 
-    fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+    fn get_elements_for_true(
+        &self,
+        _: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
         vec![]
     }
 }

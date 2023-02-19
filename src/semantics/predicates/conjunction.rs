@@ -94,50 +94,66 @@ impl<E: Hash + Eq + Clone, const L_ARITY: usize, const R_ARITY: usize, const C_A
         }
     }
 
-    fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, C_ARITY>> {
-        let left_trues = self
-            .left
-            .get_elements_for_true()
-            .into_iter()
-            .map(|a| self.map_left.backward(&a, ElementSet::<E>::All));
+    fn get_elements_for_true(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, C_ARITY>> {
+        if sig.contains(&self.sig) {
+            vec![]
+        } else {
+            sig.push(self.sig);
+            let left_trues = self
+                .left
+                .get_elements_for_true(sig)
+                .into_iter()
+                .map(|a| self.map_left.backward(&a, ElementSet::<E>::All));
 
-        let right_trues: Vec<Arguments<ElementSet<E>, C_ARITY>> = self
-            .right
-            .get_elements_for_true()
-            .into_iter()
-            .map(|a| self.map_right.backward(&a, ElementSet::<E>::All))
-            .collect();
+            let right_trues: Vec<Arguments<ElementSet<E>, C_ARITY>> = self
+                .right
+                .get_elements_for_true(sig)
+                .into_iter()
+                .map(|a| self.map_right.backward(&a, ElementSet::<E>::All))
+                .collect();
 
-        left_trues
-            .flat_map(|l| right_trues.iter().map(move |r| (l.clone(), r.clone())))
-            .map(|(mut l, r)| {
-                l &= r;
-                l
-            })
-            .collect()
+            left_trues
+                .flat_map(|l| right_trues.iter().map(move |r| (l.clone(), r.clone())))
+                .map(|(mut l, r)| {
+                    l &= r;
+                    l
+                })
+                .collect()
+        }
     }
 
-    fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, C_ARITY>> {
-        let left_falses = self
-            .left
-            .get_elements_for_false()
-            .into_iter()
-            .map(|a| self.map_left.backward(&a, ElementSet::<E>::All));
+    fn get_elements_for_false(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, C_ARITY>> {
+        if sig.contains(&self.sig) {
+            vec![]
+        } else {
+            sig.push(self.sig);
+            let left_falses = self
+                .left
+                .get_elements_for_false(sig)
+                .into_iter()
+                .map(|a| self.map_left.backward(&a, ElementSet::<E>::All));
 
-        let right_falses: Vec<Arguments<ElementSet<E>, C_ARITY>> = self
-            .right
-            .get_elements_for_false()
-            .into_iter()
-            .map(|a| self.map_right.backward(&a, ElementSet::<E>::All))
-            .collect();
+            let right_falses: Vec<Arguments<ElementSet<E>, C_ARITY>> = self
+                .right
+                .get_elements_for_false(sig)
+                .into_iter()
+                .map(|a| self.map_right.backward(&a, ElementSet::<E>::All))
+                .collect();
 
-        left_falses
-            .flat_map(|l| right_falses.iter().map(move |r| (l.clone(), r.clone())))
-            .map(|(mut l, r)| {
-                l |= r;
-                l
-            })
-            .collect()
+            left_falses
+                .flat_map(|l| right_falses.iter().map(move |r| (l.clone(), r.clone())))
+                .map(|(mut l, r)| {
+                    l |= r;
+                    l
+                })
+                .collect()
+        }
     }
 }
 
@@ -195,41 +211,59 @@ impl<E: Hash + Eq + Clone, const WITH_ARITY: usize, const C_ARITY: usize, const 
 
     /// Conjunction part is false for all args for which conjunction is false
     /// and other part is true.
-    fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
-        let conjunction_false = self
-            .for_conjunction
-            .get_elements_for_false()
-            .into_iter()
-            .map(|args| self.map_this.forward(&args));
+    fn get_elements_for_false(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+        if sig.contains(&self.sig) {
+            self.inner.get_elements_for_false(sig)
+        } else {
+            sig.push(self.sig);
+            let conjunction_false = self
+                .for_conjunction
+                .get_elements_for_false(sig)
+                .into_iter()
+                .map(|args| self.map_this.forward(&args));
 
-        let other_operand_true: Vec<_> = self
-            .with
-            .get_elements_for_true()
-            .into_iter()
-            .map(|args| self.map_other.backward(&args, ElementSet::All))
-            .map(|args| self.map_this.forward(&args))
-            .collect();
+            let other_operand_true: Vec<_> = self
+                .with
+                .get_elements_for_true(sig)
+                .into_iter()
+                .map(|args| self.map_other.backward(&args, ElementSet::All))
+                .map(|args| self.map_this.forward(&args))
+                .collect();
 
-        conjunction_false
-            .flat_map(|l| {
-                other_operand_true
-                    .iter()
-                    .map(move |r| (l.clone(), r.clone()))
-            })
-            .map(|(mut l, r)| {
-                l &= r;
-                l
-            })
-            .collect()
+            conjunction_false
+                .flat_map(|l| {
+                    other_operand_true
+                        .iter()
+                        .map(move |r| (l.clone(), r.clone()))
+                })
+                .map(|(mut l, r)| {
+                    l &= r;
+                    l
+                })
+                .chain(self.inner.get_elements_for_false(sig).into_iter())
+                .collect()
+        }
     }
 
     /// Conjunction part is true for all args for which conjunction is true
-    fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
-        self.for_conjunction
-            .get_elements_for_true()
-            .into_iter()
-            .map(|args| self.map_this.forward(&args))
-            .collect()
+    fn get_elements_for_true(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+        if sig.contains(&self.sig) {
+            self.inner.get_elements_for_true(sig)
+        } else {
+            sig.push(self.sig);
+            self.for_conjunction
+                .get_elements_for_true(sig)
+                .into_iter()
+                .map(|args| self.map_this.forward(&args))
+                .chain(self.inner.get_elements_for_true(sig).into_iter())
+                .collect()
+        }
     }
 }
 

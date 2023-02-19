@@ -32,16 +32,28 @@ impl<E, const ARITY: usize> Predicate<E, ARITY> for Negation<E, ARITY> {
 
     fn get_elements_for_false(
         &self,
+        sig: &mut crate::semantics::GraphTraversalSignature,
     ) -> Vec<crate::semantics::elements::Arguments<crate::semantics::elements::ElementSet<E>, ARITY>>
     {
-        self.of.get_elements_for_true()
+        if sig.contains(&self.sig) {
+            vec![]
+        } else {
+            sig.push(self.sig);
+            self.of.get_elements_for_true(sig)
+        }
     }
 
     fn get_elements_for_true(
         &self,
+        sig: &mut crate::semantics::GraphTraversalSignature,
     ) -> Vec<crate::semantics::elements::Arguments<crate::semantics::elements::ElementSet<E>, ARITY>>
     {
-        self.of.get_elements_for_false()
+        if sig.contains(&self.sig) {
+            vec![]
+        } else {
+            sig.push(self.sig);
+            self.of.get_elements_for_false(sig)
+        }
     }
 }
 
@@ -104,24 +116,36 @@ impl<E, const ARITY: usize> Predicate<E, ARITY> for IsNegated<E, ARITY> {
 
     fn get_elements_for_false(
         &self,
+        sig: &mut crate::semantics::GraphTraversalSignature,
     ) -> Vec<crate::semantics::elements::Arguments<crate::semantics::elements::ElementSet<E>, ARITY>>
     {
-        self.negation
-            .get_elements_for_true()
-            .into_iter()
-            .chain(self.inner.get_elements_for_false().into_iter())
-            .collect()
+        if sig.contains(&self.sig) {
+            self.inner.get_elements_for_false(sig)
+        } else {
+            sig.push(self.sig);
+            self.negation
+                .get_elements_for_true(sig)
+                .into_iter()
+                .chain(self.inner.get_elements_for_false(sig).into_iter())
+                .collect()
+        }
     }
 
     fn get_elements_for_true(
         &self,
+        sig: &mut crate::semantics::GraphTraversalSignature,
     ) -> Vec<crate::semantics::elements::Arguments<crate::semantics::elements::ElementSet<E>, ARITY>>
     {
-        self.negation
-            .get_elements_for_false()
-            .into_iter()
-            .chain(self.inner.get_elements_for_true().into_iter())
-            .collect()
+        if sig.contains(&self.sig) {
+            self.inner.get_elements_for_true(sig)
+        } else {
+            sig.push(self.sig);
+            self.negation
+                .get_elements_for_false(sig)
+                .into_iter()
+                .chain(self.inner.get_elements_for_true(sig).into_iter())
+                .collect()
+        }
     }
 }
 

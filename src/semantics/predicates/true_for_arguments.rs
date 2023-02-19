@@ -27,11 +27,17 @@ impl<E: Eq, const ARITY: usize> Predicate<E, ARITY> for TrueForArguments<E, ARIT
         TruthValue::Determined(element_matches) | self.inner.call_for_elements(arguments, sig)
     }
 
-    fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+    fn get_elements_for_false(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
         todo!()
     }
 
-    fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+    fn get_elements_for_true(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
         todo!()
     }
 }

@@ -23,16 +23,18 @@ impl<E, const ARITY: usize> Predicate<E, ARITY> for LinkedPredicate<E, ARITY> {
 
     fn get_elements_for_false(
         &self,
+        sig: &mut crate::semantics::GraphTraversalSignature,
     ) -> Vec<crate::semantics::elements::Arguments<crate::semantics::elements::ElementSet<E>, ARITY>>
     {
-        self.linked.get_elements_for_false()
+        self.linked.get_elements_for_false(sig)
     }
 
     fn get_elements_for_true(
         &self,
+        sig: &mut crate::semantics::GraphTraversalSignature,
     ) -> Vec<crate::semantics::elements::Arguments<crate::semantics::elements::ElementSet<E>, ARITY>>
     {
-        self.linked.get_elements_for_true()
+        self.linked.get_elements_for_true(sig)
     }
 }
 

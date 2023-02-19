@@ -20,11 +20,17 @@ impl<E: Clone, const ARITY: usize> Predicate<E, ARITY> for UniversallyObeyed {
         TruthValue::Determined(true)
     }
 
-    fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+    fn get_elements_for_true(
+        &self,
+        _: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
         vec![Arguments::every(ElementSet::All)]
     }
 
-    fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+    fn get_elements_for_false(
+        &self,
+        _: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
         vec![Arguments::every(ElementSet::None)]
     }
 }
@@ -34,13 +40,13 @@ impl UniversallyObeyed {
     pub fn assert_on<E: Clone, const ARITY: usize>(
         predicate: &PredicateNode<E, ARITY>,
     ) -> AssertionResponse {
-        for args in predicate.get_elements_for_false() {
+        for args in predicate.get_elements_for_false(&mut Vec::new()) {
             if args.exists() {
                 return AssertionResponse::AssertionInvalid;
             };
         }
 
-        for args in predicate.get_elements_for_true() {
+        for args in predicate.get_elements_for_true(&mut Vec::new()) {
             if args.maximal() {
                 return AssertionResponse::AssertionRedundant;
             };
