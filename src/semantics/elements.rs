@@ -26,6 +26,12 @@ pub enum ElementQuantifier<E> {
     Any,
 }
 
+impl<E> From<E> for ElementQuantifier<E> {
+    fn from(e: E) -> Self {
+        Self::One(e)
+    }
+}
+
 /// Return a set of elements within the Domain of Discourse (DOD).
 ///
 /// Subtly different to `ElementQuantifier`: `ElementQuantifier` specifies a
@@ -274,14 +280,20 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
 /// # Examples
 /// ```
 /// # use first_order_logic::{args, semantics::elements::Arguments};
-/// let args: Arguments<usize, 3> = args!(3, 6, 4);
+/// let args: Arguments<usize, 3> = args!(3 as usize, 6 as usize, 4 as usize);
+/// ```
+/// 
+/// Automatically performs the conversion when used with `ElementQuantifier`:
+/// ```
+/// # use first_order_logic::{args, semantics::elements::{Arguments, ElementQuantifier}};
+/// let args: Arguments<ElementQuantifier<usize>, 3> = args!(3, 6, 4);
 /// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "semantics")))]
 #[macro_export]
 macro_rules! args {
     ($($x:expr),+ $(,)?) => (
         $crate::semantics::elements::Arguments::from(
-            [$($x),+]
+            [$($x.into()),+]
         )
     );
 }
