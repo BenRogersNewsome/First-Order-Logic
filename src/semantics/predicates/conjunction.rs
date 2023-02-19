@@ -193,11 +193,93 @@ impl<E: Hash + Eq + Clone, const WITH_ARITY: usize, const C_ARITY: usize, const 
         }
     }
 
+    /// Conjunction part is false for all args for which conjunction is false
+    /// and other part is true.
     fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
-        todo!()
+        let conjunction_false = self
+            .for_conjunction
+            .get_elements_for_false()
+            .into_iter()
+            .map(|args| self.map_this.forward(&args));
+
+        let other_operand_true: Vec<_> = self
+            .with
+            .get_elements_for_true()
+            .into_iter()
+            .map(|args| self.map_other.backward(&args, ElementSet::All))
+            .map(|args| self.map_this.forward(&args))
+            .collect();
+
+        conjunction_false
+            .flat_map(|l| {
+                other_operand_true
+                    .iter()
+                    .map(move |r| (l.clone(), r.clone()))
+            })
+            .map(|(mut l, r)| {
+                l &= r;
+                l
+            })
+            .collect()
     }
 
+    /// Conjunction part is true for all args for which conjunction is true
     fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
-        todo!()
+        self.for_conjunction
+            .get_elements_for_true()
+            .into_iter()
+            .map(|args| self.map_this.forward(&args))
+            .collect()
+    }
+}
+
+#[cfg(test)]
+mod test_conjunction {
+    use crate::{
+        one_to_one,
+        semantics::{
+            elements::{Arguments, ElementQuantifier},
+            predicates::{Conjunction, Negation, TrueForArguments},
+            Predicate, PredicateNode,
+        },
+        TruthValue,
+    };
+
+    #[test]
+    fn test_conjunction_forward_assertions() {
+        let predicate_a: PredicateNode<usize, 1> = PredicateNode::default();
+        let predicate_b: PredicateNode<usize, 1> = PredicateNode::default();
+        let args: Arguments<ElementQuantifier<usize>, 1> =
+            Arguments::from([ElementQuantifier::One(4)]);
+        TrueForArguments::assert_on(&predicate_a, vec![args.clone()]);
+        TrueForArguments::assert_on(&predicate_b, vec![args.clone()]);
+
+        let conjunction: PredicateNode<usize, 1> =
+            Conjunction::create(&predicate_a, one_to_one!(), &predicate_b, one_to_one!());
+
+        assert_eq!(
+            conjunction.call_for_elements(&args, &mut Vec::new()),
+            TruthValue::Determined(true)
+        );
+    }
+
+    #[test]
+    fn test_conjunction_reverse_assertions() {
+        let args: Arguments<ElementQuantifier<usize>, 1> =
+            Arguments::from([ElementQuantifier::One(4)]);
+        let predicate_a: PredicateNode<usize, 1> = PredicateNode::default();
+
+        let predicate_b: PredicateNode<usize, 1> = PredicateNode::default();
+        TrueForArguments::assert_on(&predicate_b, vec![args.clone()]);
+
+        let conjunction: PredicateNode<usize, 1> =
+            Conjunction::create(&predicate_a, one_to_one!(), &predicate_b, one_to_one!());
+
+        TrueForArguments::assert_on(&Negation::create(&conjunction), vec![args.clone()]);
+
+        assert_eq!(
+            predicate_a.call_for_elements(&args, &mut Vec::new()),
+            TruthValue::Determined(false)
+        );
     }
 }
