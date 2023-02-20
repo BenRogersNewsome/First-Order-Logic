@@ -289,7 +289,7 @@ mod test_conjunction {
         TrueForArguments::assert_on(&predicate_b, vec![args.clone()]);
 
         let conjunction: PredicateNode<usize, 1> =
-            Conjunction::create(&predicate_a, one_to_one!(), &predicate_b, one_to_one!());
+            Conjunction::create(&predicate_a, one_to_one!(1), &predicate_b, one_to_one!(1));
 
         assert_eq!(
             conjunction.call_for_elements(&args, &mut Vec::new()),
@@ -307,7 +307,7 @@ mod test_conjunction {
         TrueForArguments::assert_on(&predicate_b, vec![args.clone()]);
 
         let conjunction: PredicateNode<usize, 1> =
-            Conjunction::create(&predicate_a, one_to_one!(), &predicate_b, one_to_one!());
+            Conjunction::create(&predicate_a, one_to_one!(1), &predicate_b, one_to_one!(1));
 
         TrueForArguments::assert_on(&Negation::create(&conjunction), vec![args.clone()]);
 

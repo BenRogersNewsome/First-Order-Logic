@@ -292,7 +292,7 @@ mod test_disjunction {
         let predicate_b: PredicateNode<usize, 1> = PredicateNode::default();
 
         let disjunction: PredicateNode<usize, 1> =
-            Disjunction::create(&predicate_a, one_to_one!(), &predicate_b, one_to_one!());
+            Disjunction::create(&predicate_a, one_to_one!(1), &predicate_b, one_to_one!(1));
 
         assert_eq!(
             disjunction.call_for_elements(&args, &mut Vec::new()),
@@ -309,7 +309,7 @@ mod test_disjunction {
         let predicate_b: PredicateNode<usize, 1> = PredicateNode::default();
 
         let disjunction: PredicateNode<usize, 1> =
-            Disjunction::create(&predicate_a, one_to_one!(), &predicate_b, one_to_one!());
+            Disjunction::create(&predicate_a, one_to_one!(1), &predicate_b, one_to_one!(1));
 
         TrueForArguments::assert_on(&Negation::create(&disjunction), vec![args.clone()]);
 

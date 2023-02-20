@@ -325,9 +325,14 @@ macro_rules! args {
 #[cfg_attr(docsrs, doc(cfg(feature = "semantics")))]
 #[macro_export]
 macro_rules! one_to_one {
-    () => {{
+    ($ar:ident) => {{
         use $crate::semantics::elements::ArgumentMap;
-        let forward = [0; 1];
+        let forward = [0; $ar];
+        ArgumentMap::new(forward)
+    }};
+    ($ar:literal) => {{
+        use $crate::semantics::elements::ArgumentMap;
+        let forward = [0; $ar];
         ArgumentMap::new(forward)
     }};
 }

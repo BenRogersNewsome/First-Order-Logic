@@ -20,9 +20,9 @@ fn test_simple_implication() {
     let predicate_b: PredicateNode<usize, 1> = PredicateNode::default();
     let implication: PredicateNode<usize, 1> = Disjunction::create(
         &Negation::create(&predicate_a),
-        one_to_one!(),
+        one_to_one!(1),
         &predicate_b,
-        one_to_one!(),
+        one_to_one!(1),
     );
 
     // |- A -> B ~= True
@@ -51,9 +51,9 @@ fn test_reverse_implication_undetermined() {
     let predicate_b: PredicateNode<usize, 1> = PredicateNode::default();
     let implication: PredicateNode<usize, 1> = Disjunction::create(
         &Negation::create(&predicate_a),
-        one_to_one!(),
+        one_to_one!(1),
         &predicate_b,
-        one_to_one!(),
+        one_to_one!(1),
     );
 
     // |- A -> B ~= True

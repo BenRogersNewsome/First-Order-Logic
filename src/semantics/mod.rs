@@ -3,11 +3,12 @@ pub mod elements;
 
 use elements::{ArgumentMap, Arguments, ElementQuantifier, ElementSet, Existential};
 
-// pub mod assertions {
-//     mod implies;
+/// Functional helpers for making assertions on predicates.
+pub mod assertions {
+    mod implies;
 
-//     pub use implies::implies;
-// }
+    pub use implies::implies;
+}
 
 /// Predefined functions
 pub mod functions {
