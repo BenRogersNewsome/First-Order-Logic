@@ -37,7 +37,7 @@ impl<E> From<E> for ElementQuantifier<E> {
 /// Subtly different to `ElementQuantifier`: `ElementQuantifier` specifies a
 /// range of elements for passing to a predicate, whereas `ElementSet`
 /// corresponds to an explicit list of elements.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ElementSet<E> {
     /// Every element in the DOD.
     All,
@@ -45,6 +45,12 @@ pub enum ElementSet<E> {
     Some(Vec<E>),
     /// Zero elements in the DOD.
     None,
+}
+
+impl<E> From<E> for ElementSet<E> {
+    fn from(e: E) -> Self {
+        Self::Some(vec![e])
+    }
 }
 
 impl<E> Existential for ElementSet<E> {
