@@ -1,4 +1,5 @@
-    use crate::{
+
+use crate::{
     semantics::{Arguments, ElementQuantifier, ElementSet, GraphTraversalSignature, Predicate},
     TruthValue,
 };
@@ -33,7 +34,11 @@ impl<E: Clone, const ARITY: usize> Predicate<E, ARITY> for Undetermined {
 
 #[cfg(test)]
 mod test_undetermined {
-    use crate::{semantics::{Predicate, PredicateNode}, args, TruthValue};
+    use crate::{
+        args,
+        semantics::{Predicate, PredicateNode},
+        TruthValue,
+    };
 
     use super::Undetermined;
 
@@ -55,19 +60,13 @@ mod test_undetermined {
     fn test_get_elements_for_true() {
         let predicate = setup();
 
-        assert_eq!(
-            predicate.get_elements_for_true(&mut Vec::new()),
-            vec![],
-        );
+        assert_eq!(predicate.get_elements_for_true(&mut Vec::new()), vec![],);
     }
 
     #[test]
     fn test_get_elements_for_false() {
         let predicate = setup();
 
-        assert_eq!(
-            predicate.get_elements_for_false(&mut Vec::new()),
-            vec![],
-        );
+        assert_eq!(predicate.get_elements_for_false(&mut Vec::new()), vec![],);
     }
 }

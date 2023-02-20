@@ -83,19 +83,19 @@ impl<E: 'static + Eq + Clone, const ARITY: usize> TrueForArguments<E, ARITY> {
 
 #[cfg(test)]
 mod test_true_for_argument {
-    use crate::{semantics::{PredicateNode, Predicate}, args, TruthValue, AssertionResponse};
+    use crate::{
+        args,
+        semantics::{Predicate, PredicateNode},
+        AssertionResponse, TruthValue,
+    };
 
     use super::TrueForArguments;
 
     #[test]
     fn test_call_for_args() {
-
         let predicate: PredicateNode<usize, 2> = PredicateNode::default();
         assert_eq!(
-            TrueForArguments::assert_on(&predicate, vec![
-                args!(2, 4),
-                args!(2, 3),
-            ]),
+            TrueForArguments::assert_on(&predicate, vec![args!(2, 4), args!(2, 3),]),
             AssertionResponse::AssertionMade,
         );
 
@@ -115,22 +115,15 @@ mod test_true_for_argument {
 
     #[test]
     fn test_get_elements_for_true() {
-
         let predicate: PredicateNode<usize, 1> = PredicateNode::default();
         assert_eq!(
-            TrueForArguments::assert_on(&predicate, vec![
-                args!(2),
-                args!(3),
-            ]),
+            TrueForArguments::assert_on(&predicate, vec![args!(2), args!(3),]),
             AssertionResponse::AssertionMade,
         );
 
         assert_eq!(
             predicate.get_elements_for_true(&mut Vec::new()),
-            vec![
-                args!(2),
-                args!(3),
-            ],
+            vec![args!(2), args!(3),],
         );
     }
 
@@ -138,46 +131,30 @@ mod test_true_for_argument {
     fn test_get_elements_for_false() {
         let predicate: PredicateNode<usize, 1> = PredicateNode::default();
         assert_eq!(
-            TrueForArguments::assert_on(&predicate, vec![
-                args!(2),
-                args!(3),
-            ]),
+            TrueForArguments::assert_on(&predicate, vec![args!(2), args!(3),]),
             AssertionResponse::AssertionMade,
         );
 
-        assert_eq!(
-            predicate.get_elements_for_false(&mut Vec::new()),
-            vec![],
-        );
+        assert_eq!(predicate.get_elements_for_false(&mut Vec::new()), vec![],);
     }
 
     #[test]
     fn test_repeated_assertion_without_redundancy() {
         let predicate: PredicateNode<usize, 1> = PredicateNode::default();
         assert_eq!(
-            TrueForArguments::assert_on(&predicate, vec![
-                args!(2),
-                args!(3),
-            ]),
+            TrueForArguments::assert_on(&predicate, vec![args!(2), args!(3),]),
             AssertionResponse::AssertionMade,
         );
 
         assert_eq!(
-            TrueForArguments::assert_on(&predicate, vec![
-                args!(2),
-                args!(4),
-            ]),
+            TrueForArguments::assert_on(&predicate, vec![args!(2), args!(4),]),
             AssertionResponse::AssertionMade,
         );
 
         // Shouldn't return `args!(2)` twice.
         assert_eq!(
             predicate.get_elements_for_true(&mut Vec::new()),
-            vec![
-                args!(4),
-                args!(2),
-                args!(3),
-            ],
+            vec![args!(4), args!(2), args!(3),],
         );
     }
 
@@ -185,18 +162,12 @@ mod test_true_for_argument {
     fn test_repeated_assertion_with_redundancy() {
         let predicate: PredicateNode<usize, 1> = PredicateNode::default();
         assert_eq!(
-            TrueForArguments::assert_on(&predicate, vec![
-                args!(2),
-                args!(3),
-            ]),
+            TrueForArguments::assert_on(&predicate, vec![args!(2), args!(3),]),
             AssertionResponse::AssertionMade,
         );
 
         assert_eq!(
-            TrueForArguments::assert_on(&predicate, vec![
-                args!(2),
-                args!(3),
-            ]),
+            TrueForArguments::assert_on(&predicate, vec![args!(2), args!(3),]),
             AssertionResponse::AssertionRedundant,
         );
     }

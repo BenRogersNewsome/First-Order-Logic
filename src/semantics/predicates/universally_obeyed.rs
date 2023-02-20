@@ -64,7 +64,14 @@ impl UniversallyObeyed {
 
 #[cfg(test)]
 mod test_universally_obeyed {
-    use crate::{semantics::{Predicate, PredicateNode, elements::{ElementSet, ElementQuantifier}}, args, TruthValue, AssertionResponse};
+    use crate::{
+        args,
+        semantics::{
+            elements::{ElementQuantifier, ElementSet},
+            Predicate, PredicateNode,
+        },
+        AssertionResponse, TruthValue,
+    };
 
     use super::UniversallyObeyed;
 
@@ -98,9 +105,7 @@ mod test_universally_obeyed {
 
         assert_eq!(
             predicate.get_elements_for_true(&mut Vec::new()),
-            vec![
-                args!(ElementSet::All)
-            ],
+            vec![args!(ElementSet::All)],
         );
     }
 
@@ -110,9 +115,7 @@ mod test_universally_obeyed {
 
         assert_eq!(
             predicate.get_elements_for_false(&mut Vec::new()),
-            vec![
-                args!(ElementSet::None)
-            ],
+            vec![args!(ElementSet::None)],
         );
     }
 }
