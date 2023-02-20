@@ -61,3 +61,58 @@ impl UniversallyObeyed {
         predicate.replace(|_| Box::new(Self()))
     }
 }
+
+#[cfg(test)]
+mod test_universally_obeyed {
+    use crate::{semantics::{Predicate, PredicateNode, elements::{ElementSet, ElementQuantifier}}, args, TruthValue, AssertionResponse};
+
+    use super::UniversallyObeyed;
+
+    fn setup() -> PredicateNode<usize, 1> {
+        let predicate: PredicateNode<usize, 1> = PredicateNode::default();
+        assert_eq!(
+            UniversallyObeyed::assert_on(&predicate),
+            AssertionResponse::AssertionMade,
+        );
+        predicate
+    }
+
+    #[test]
+    fn test_call_for_args() {
+        let predicate = setup();
+
+        assert_eq!(
+            predicate.call_for_elements(&args!(1), &mut Vec::new()),
+            TruthValue::Determined(true),
+        );
+
+        assert_eq!(
+            predicate.call_for_elements(&args!(ElementQuantifier::Any), &mut Vec::new()),
+            TruthValue::Determined(true),
+        );
+    }
+
+    #[test]
+    fn test_get_elements_for_true() {
+        let predicate = setup();
+
+        assert_eq!(
+            predicate.get_elements_for_true(&mut Vec::new()),
+            vec![
+                args!(ElementSet::All)
+            ],
+        );
+    }
+
+    #[test]
+    fn test_get_elements_for_false() {
+        let predicate = setup();
+
+        assert_eq!(
+            predicate.get_elements_for_false(&mut Vec::new()),
+            vec![
+                args!(ElementSet::None)
+            ],
+        );
+    }
+}
