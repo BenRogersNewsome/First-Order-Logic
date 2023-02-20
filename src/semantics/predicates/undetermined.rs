@@ -1,4 +1,3 @@
-
 use crate::{
     semantics::{Arguments, ElementQuantifier, ElementSet, GraphTraversalSignature, Predicate},
     TruthValue,

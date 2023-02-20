@@ -9,8 +9,16 @@ use crate::{
     AssertionResponse,
 };
 
-/// Assert that left implies right:
-///     left -> right
+/// Assert that left implies right.
+///
+/// # Examples
+///
+/// ```
+/// # use first_order_logic::{args, TruthValue, semantics::{PredicateNode, assertions::implies, predicates::TrueForArguments}};
+/// # let predicate_a: PredicateNode<usize, 1> = PredicateNode::default();
+/// # let predicate_b: PredicateNode<usize, 1> = PredicateNode::default();
+/// implies(&predicate_a, &predicate_b);
+/// ```
 pub fn implies<E: 'static + Clone + Eq + Hash, const ARITY: usize>(
     left: &PredicateNode<E, ARITY>,
     right: &PredicateNode<E, ARITY>,
