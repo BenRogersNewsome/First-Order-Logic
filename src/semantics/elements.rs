@@ -26,22 +26,34 @@ pub enum ElementQuantifier<E> {
     Any,
 }
 
+impl<E> From<E> for ElementQuantifier<E> {
+    fn from(e: E) -> Self {
+        Self::One(e)
+    }
+}
+
 /// Return a set of elements within the Domain of Discourse (DOD).
 ///
 /// Subtly different to `ElementQuantifier`: `ElementQuantifier` specifies a
 /// range of elements for passing to a predicate, whereas `ElementSet`
 /// corresponds to an explicit list of elements.
-#[derive(Clone, Debug)]
-pub enum ElementSet<'a, E> {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ElementSet<E> {
     /// Every element in the DOD.
     All,
     /// A list of specific elements in the DOD.
-    Some(Vec<&'a E>),
+    Some(Vec<E>),
     /// Zero elements in the DOD.
     None,
 }
 
-impl<'a, E> Existential for ElementSet<'a, E> {
+impl<E> From<E> for ElementSet<E> {
+    fn from(e: E) -> Self {
+        Self::Some(vec![e])
+    }
+}
+
+impl<E> Existential for ElementSet<E> {
     fn exists(&self) -> bool {
         !matches!(self, Self::None)
     }
@@ -51,7 +63,7 @@ impl<'a, E> Existential for ElementSet<'a, E> {
     }
 }
 
-impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<'a, E> {
+impl<E: Hash + Eq + Clone> BitAndAssign for ElementSet<E> {
     fn bitand_assign(&mut self, rhs: Self) {
         match (&*self, &rhs) {
             (&Self::All, x) | (x, &Self::All) => *self = x.clone(),
@@ -59,20 +71,22 @@ impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<'a, E> {
             (Self::None, _) | (_, Self::None) => *self = Self::None,
 
             (Self::Some(x), Self::Some(y)) => {
-                let set_x: HashSet<&E> = x.iter().cloned().collect();
-                let set_y: HashSet<&E> = y.iter().cloned().collect();
+                let set_x: HashSet<E> = x.iter().cloned().collect();
+                let set_y: HashSet<E> = y.iter().cloned().collect();
                 *self = Self::Some(set_x.intersection(&set_y).into_iter().cloned().collect());
             }
         }
     }
 }
 
-impl<'a, E: Clone> BitOrAssign for ElementSet<'a, E> {
+impl<E: Clone> BitOrAssign for ElementSet<E> {
     fn bitor_assign(&mut self, rhs: Self) {
-        match (&*self, &rhs) {
+        match (&*self, rhs) {
             (Self::All, _) | (_, Self::All) => *self = Self::All,
 
-            (Self::None, x) | (x, Self::None) => *self = x.clone(),
+            (Self::None, x) => *self = x,
+
+            (x, Self::None) => *self = x.clone(),
 
             (Self::Some(_), Self::Some(y)) => {
                 if let Self::Some(x) = self {
@@ -96,6 +110,14 @@ impl<'a, E: Clone> BitOrAssign for ElementSet<'a, E> {
 #[derive(Debug)]
 pub struct Arguments<E, const ARITY: usize> {
     _inner: [E; ARITY],
+}
+
+impl<E, const ARITY: usize> Arguments<E, ARITY> {
+    /// Convert arguments from one type to another using a callback function
+    /// applied to each arg.
+    pub fn map<F>(self, callback: fn(args: E) -> F) -> Arguments<F, ARITY> {
+        Arguments::from(self._inner.map(callback))
+    }
 }
 
 impl<E, const ARITY: usize> PartialEq for Arguments<E, ARITY>
@@ -274,14 +296,20 @@ impl<const FROM_ARITY: usize, const TO_ARITY: usize> ArgumentMap<FROM_ARITY, TO_
 /// # Examples
 /// ```
 /// # use first_order_logic::{args, semantics::elements::Arguments};
-/// let args: Arguments<usize, 3> = args!(3, 6, 4);
+/// let args: Arguments<usize, 3> = args!(3 as usize, 6 as usize, 4 as usize);
+/// ```
+///
+/// Automatically performs the conversion when used with `ElementQuantifier`:
+/// ```
+/// # use first_order_logic::{args, semantics::elements::{Arguments, ElementQuantifier}};
+/// let args: Arguments<ElementQuantifier<usize>, 3> = args!(3, 6, 4);
 /// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "semantics")))]
 #[macro_export]
 macro_rules! args {
     ($($x:expr),+ $(,)?) => (
         $crate::semantics::elements::Arguments::from(
-            [$($x),+]
+            [$($x.into()),+]
         )
     );
 }
@@ -292,14 +320,19 @@ macro_rules! args {
 ///
 /// ```
 /// # use first_order_logic::{semantics::elements::ArgumentMap, one_to_one};
-/// let one_to_one_map: ArgumentMap<1,1> = one_to_one!();
+/// let one_to_one_map: ArgumentMap<1,1> = one_to_one!(1);
 /// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "semantics")))]
 #[macro_export]
 macro_rules! one_to_one {
-    () => {{
+    ($ar:ident) => {{
         use $crate::semantics::elements::ArgumentMap;
-        let forward = [0; 1];
+        let forward = [0; $ar];
+        ArgumentMap::new(forward)
+    }};
+    ($ar:literal) => {{
+        use $crate::semantics::elements::ArgumentMap;
+        let forward = [0; $ar];
         ArgumentMap::new(forward)
     }};
 }

@@ -40,12 +40,18 @@ pub trait Predicate<E, const ARITY: usize> {
     /// Note: An empty array does **not** mean that the predicate is false for
     /// all sets of arguments, it simply means that there is not knowledge of a
     /// specific set of arguments for which the predicate is definitely true.
-    fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, ARITY>>;
+    fn get_elements_for_true(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>>;
 
     /// Get a set of arguments for which the predicate is known to be false.
     ///
     /// See [Self::get_elements_for_true()] for specifics.
-    fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, ARITY>>;
+    fn get_elements_for_false(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>>;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,20 +195,26 @@ impl<E, const ARITY: usize> Predicate<E, ARITY> for PredicateNode<E, ARITY> {
         inner.call_for_elements(element_nodes, sig)
     }
 
-    fn get_elements_for_true(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+    fn get_elements_for_true(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
         // Safety: We use unsafe code to get a reference to the inner element,
         // but we immediately consume the reference, and return a value which
         // doesn't reference the inner element.
         let inner: &dyn Predicate<E, ARITY> = unsafe { self.get_inner_as_ref() }.as_ref();
-        inner.get_elements_for_true()
+        inner.get_elements_for_true(sig)
     }
 
-    fn get_elements_for_false(&self) -> Vec<Arguments<ElementSet<E>, ARITY>> {
+    fn get_elements_for_false(
+        &self,
+        sig: &mut GraphTraversalSignature,
+    ) -> Vec<Arguments<ElementSet<E>, ARITY>> {
         // Safety: We use unsafe code to get a reference to the inner element,
         // but we immediately consume the reference, and return a value which
         // doesn't reference the inner element.
         let inner: &dyn Predicate<E, ARITY> = unsafe { self.get_inner_as_ref() }.as_ref();
-        inner.get_elements_for_false()
+        inner.get_elements_for_false(sig)
     }
 }
 
