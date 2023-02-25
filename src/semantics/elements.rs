@@ -63,7 +63,7 @@ impl<E> Existential for ElementSet<E> {
     }
 }
 
-impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<E> {
+impl<E: Hash + Eq + Clone> BitAndAssign for ElementSet<E> {
     fn bitand_assign(&mut self, rhs: Self) {
         match (&*self, &rhs) {
             (&Self::All, x) | (x, &Self::All) => *self = x.clone(),
@@ -79,7 +79,7 @@ impl<'a, E: Hash + Eq + Clone> BitAndAssign for ElementSet<E> {
     }
 }
 
-impl<'a, E: Clone> BitOrAssign for ElementSet<E> {
+impl<E: Clone> BitOrAssign for ElementSet<E> {
     fn bitor_assign(&mut self, rhs: Self) {
         match (&*self, rhs) {
             (Self::All, _) | (_, Self::All) => *self = Self::All,
@@ -320,7 +320,7 @@ macro_rules! args {
 ///
 /// ```
 /// # use first_order_logic::{semantics::elements::ArgumentMap, one_to_one};
-/// let one_to_one_map: ArgumentMap<1,1> = one_to_one!();
+/// let one_to_one_map: ArgumentMap<1,1> = one_to_one!(1);
 /// ```
 #[cfg_attr(docsrs, doc(cfg(feature = "semantics")))]
 #[macro_export]
